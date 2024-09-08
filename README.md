@@ -5,7 +5,7 @@ Written with Node.js and Typescript, it will create a cli tool called `epub_news
 
 So far, it will retrieve latest news from [Le Monde](https://www.lemonde.fr/).
 
-> ⚠️ _Le Monde has both public and membership articles. I encourage you of helping them if you can! On top of that, some articles behind a paywall will require you to set your website cookie in order to be fetched._
+> ⚠️ _Le Monde has both public and membership articles. I encourage you to help them if you can! On top of that, some articles behind a paywall will require you to set your website cookie in order to be fetched._
 
 ### Installation
 Simply run `npm install` to install dev dependencies.
