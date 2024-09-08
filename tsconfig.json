@@ -1,0 +1,14 @@
+{
+  "include": ["src/**/*"],
+  "exclude": [ "node_modules", "dist" ],
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "esModuleInterop": true,
+    "strict": true,
+    "outDir": "dist",
+    "sourceMap": true,
+    "skipLibCheck": true
+  }
+}

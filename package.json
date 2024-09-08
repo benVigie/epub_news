@@ -1,0 +1,30 @@
+{
+  "name": "epub_news",
+  "version": "1.0.0",
+  "description": "Fetch RSS feeds from online media and create an ebook. Better way to read news from e-ink tablets !",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc && mv ./dist/index.js ./dist/epub_news && chmod +x ./dist/epub_news",
+    "start": "tsc && node ./dist/index.js",
+    "debug": "tsc && node ./dist/index.js -d",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "benVigie",
+  "license": "Mozilla Public License Version 2.0",
+  "dependencies": {
+    "@lesjoursfr/html-to-epub": "^4.4.0",
+    "@types/node": "^22.5.4",
+    "@types/luxon": "^3.4.2",
+    "chalk": "^4",
+    "commander": "^12.1.0",
+    "dotenv": "^16.4.5",
+    "luxon": "^3.5.0",
+    "node-html-parser": "^6.1.13",
+    "ora": "^8.1.0",
+    "prompts": "^2.4.2",
+    "rss-parser": "^3.13.0",
+    "terminal-link": "^3.0.0",
+    "typescript": "^5.5.4"
+  }
+}
