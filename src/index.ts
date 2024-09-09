@@ -10,6 +10,7 @@ import { EPub, EpubOptions } from "@lesjoursfr/html-to-epub";
 import { Command, OptionValues } from "commander";
 import ora, { Ora } from "ora";
 import { DateTime } from "luxon";
+import prompts from "prompts";
 import terminalLink from "terminal-link";
 
 // Globals and tools
@@ -182,6 +183,22 @@ async function main() {
   for (const newsFeed of FLUX) {
     const feedNews = await parseRSSFeed(newsFeed);
     articles = articles.concat(feedNews);
+  }
+
+  if (prg_options.interactive) {
+    const questions = [
+      {
+        type: "multiselect",
+        name: "selection",
+        message: "Select the articles you want to read",
+        choices: articles.map((article) => {
+          return { title: article.title, value: article, selected: true };
+        }),
+        hint: "- Space & Left/Right to toggle. Return to submit",
+      },
+    ];
+    const response = await prompts(questions as any);
+    articles = response.selection;
   }
 
   // Retrieve articles and format them for the epub
