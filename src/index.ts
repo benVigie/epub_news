@@ -150,6 +150,11 @@ function trimArticleForEpub(title: string, article: string): string | null {
 }
 
 function generateNewsEpub(title: string, coverUrl: string, content: Article[]) {
+  // Le Monde already has a image service that resize its article's pictures. If we have specified size in url, change them to a bigger image that suit epub expectations
+  if (coverUrl.indexOf("644/322") >= 0) {
+    coverUrl = coverUrl.replace("644/322", "1410/2250");
+  }
+
   const epubOptions: EpubOptions = {
     title,
     description: `Les titres du ${dt.toLocaleString(DateTime.DATE_FULL)}`,
