@@ -7,15 +7,17 @@
   "scripts": {
     "build": "tsc && mv ./dist/index.js ./dist/epub_news && chmod +x ./dist/epub_news",
     "start": "tsc && node ./dist/index.js",
-    "debug": "tsc && node ./dist/index.js -d",
+    "debug": "tsc && node ./dist/index.js",
+    "debug-i": "tsc && node ./dist/index.js -i",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "benVigie",
   "license": "Mozilla Public License Version 2.0",
   "dependencies": {
     "@lesjoursfr/html-to-epub": "^4.4.0",
-    "@types/node": "^22.5.4",
     "@types/luxon": "^3.4.2",
+    "@types/node": "^22.5.4",
+    "@types/prompts": "^2.4.9",
     "chalk": "^4",
     "commander": "^12.1.0",
     "dotenv": "^16.4.5",
