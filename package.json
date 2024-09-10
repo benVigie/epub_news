@@ -28,5 +28,8 @@
     "rss-parser": "^3.13.0",
     "terminal-link": "^3.0.0",
     "typescript": "^5.5.4"
+  },
+  "devDependencies": {
+    "prettier": "3.3.3"
   }
 }
