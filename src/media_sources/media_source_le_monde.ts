@@ -13,12 +13,15 @@ const CLEAN_DOM_LIST = [
   ".article__reactions",
   ".article__siblings",
 ];
+// Regex to match all kinds of feeds from Le Monde
+const RSS_MATCHING_REGEX = new RegExp("(^https://www.lemonde.fr/){1}[a-z/_]*(rss)+[a-z/_]*(.xml$){1}");
+// Constants of image size embeded in news image url
 const DEFAUT_FEED_IMAGE_SIZE = "644/322";
 const EXPECTED_COVER_IMAGE_SIZE = "1410/2250";
 
 // Custom RSS types for Le Monde
 type CustomRssFeed = {}; // Nothing to add at feed level
-type CustomRssItem = { "media:content": any }; // Adding meia:content to retrieve news picture
+type CustomRssItem = { "media:content": any }; // Adding media:content to retrieve news picture
 
 /**
  * Implementation of MediaSource for Le Monde RSS feeds
@@ -37,6 +40,10 @@ export default class LeMondeMediaSource extends MediaSource<CustomRssFeed, Custo
       console.error(chalk.bold.red("Missing environment variable LE_MONDE_COOKIE."));
       console.error(chalk.yellow("It can result in incorrect news fetching for members exclusive articles.\n"));
     }
+  }
+
+  public static isHandlingRssFeed(rssFeedUrl: string): boolean {
+    return RSS_MATCHING_REGEX.test(rssFeedUrl);
   }
 
   /**
@@ -79,7 +86,9 @@ export default class LeMondeMediaSource extends MediaSource<CustomRssFeed, Custo
     this.createBookCoverFromArticle(newsFeed, article);
 
     // If we can retrieve the article, return it!
-    const domArticle = root.querySelector(".zone.zone--article");
+    let domArticle = root.querySelector(".zone.zone--article");
+    if (domArticle) return domArticle.toString();
+    domArticle = root.querySelector(".article--longform.article--content");
     if (domArticle) return domArticle.toString();
 
     throw new TrimArticleError("empty, skip");

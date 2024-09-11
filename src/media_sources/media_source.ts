@@ -16,6 +16,7 @@ export abstract class MediaSource<T = { [key: string]: any }, U = { [key: string
   protected _rss_sources: string;
   protected _rss_parser: Parser<T, U>;
   protected _debug: boolean;
+  protected _feedTitle: string | undefined;
   protected _spinner: Ora;
   protected _fetchOptions: https.RequestOptions;
   protected _cover: string | undefined;
@@ -39,11 +40,26 @@ export abstract class MediaSource<T = { [key: string]: any }, U = { [key: string
   }
 
   /**
+   * Get the parsed feed title
+   */
+  public get feedTitle(): string | undefined {
+    return this._feedTitle;
+  }
+
+  /**
    * Retrieve the news list from RSS source
    * @returns the news list
    */
   public async retrieveNewsListFromSource(): Promise<Array<Parser.Item & U>> {
     return await this.parseRSSFeed();
+  }
+
+  /**
+   * Static method used by the factory generator to know if the current implementation is consuming the given rss feed
+   * @param rssFeedUrl
+   */
+  public static isHandlingRssFeed(rssFeedUrl: string): boolean {
+    throw new Error("Your MediaSOurce implementation must implement this function");
   }
 
   /**
@@ -97,6 +113,7 @@ export abstract class MediaSource<T = { [key: string]: any }, U = { [key: string
     const feed = await this._rss_parser.parseURL(this._rss_sources);
     if (this._debug) console.info(chalk.blue.magenta(feed.title));
 
+    this._feedTitle = feed.title;
     feed.items.forEach((item) => {
       if (this._debug) {
         console.log(chalk.blue(`  - ${item.title}`), chalk.gray(`(${item.pubDate})`));
