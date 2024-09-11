@@ -10,10 +10,11 @@ So far, it will retrieve latest news from [Le Monde](https://www.lemonde.fr/).
 ### Installation
 Simply run `npm install` to install dev dependencies.
 
-You'll also have to create a `.env` file with these optional info:
-```env
-DEFAULT_EXPORT_PATH=/your/epub/export/path
-LE_MONDE_COOKIE="Use your account cookie to be able to retrieve all news from Le Monde"
+You'll also have to create a `.env` file with these info:
+```apacheconf
+RSS_FEEDS=https://www.lemonde.fr/rss/une.xml,other,feed,comma,separated
+DEFAULT_EXPORT_PATH=/your/epub/export/path # Optional
+LE_MONDE_COOKIE="Use your account cookie to be able to retrieve all news from Le Monde" # Optional
 ```
 
 When ready, you should be able to build the project with `npm run build` and run it with `./dist/epub_news`.
