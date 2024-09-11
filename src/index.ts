@@ -6,16 +6,13 @@ import chalk from "chalk";
 import { EPub, EpubContentOptions, EpubOptions } from "@lesjoursfr/html-to-epub";
 import { Command, OptionValues } from "commander";
 import { DateTime } from "luxon";
-import LeMondeMediaSource from "./media_sources/media_source_le_monde.js";
+import createMediaSource from "./media_sources/media_source_factory.js";
 import prompts from "prompts";
 
 // Globals and tools
 const program = new Command();
 const dt: DateTime = DateTime.now().setLocale("fr");
 let prg_options: OptionValues;
-
-// Constants
-const FLUX = ["https://www.lemonde.fr/rss/une.xml"];
 
 // Manage script parameters and parse them from CLI to make them available through the options global
 program
@@ -53,34 +50,55 @@ function generateNewsEpub(title: string, content: EpubContentOptions[], cover?: 
 }
 
 async function main() {
-  // Create a Le Monde media source instance
-  const mediaSource = new LeMondeMediaSource(FLUX[0], prg_options.debug);
-
-  // Retrieve news from service
-  let newsList = await mediaSource.retrieveNewsListFromSource();
-
-  // If we're in interactive mode, allow the user to filter the articles he wants to keep
-  if (prg_options.interactive) {
-    const questions = [
-      {
-        type: "multiselect",
-        name: "selection",
-        message: "Select the articles you want to read",
-        choices: newsList.map((news) => {
-          return { title: news.title, value: news, selected: true };
-        }),
-        hint: "- Space & Left/Right to toggle. Return to submit",
-      },
-    ];
-    const response = await prompts(questions as any);
-    newsList = response.selection;
+  // First, retrieve feeds from env
+  const envRssFeeds = process.env.RSS_FEEDS;
+  if (!envRssFeeds) {
+    console.error(chalk.bold.red("Missing environment variable RSS_FEEDS."));
+    console.error(
+      chalk.bold.yellow(
+        "You need to add the RSS feeds you want to monitor into the RSS_FEEDS env var (comma separated).",
+      ),
+    );
+    process.exit(1);
   }
+  const rssFeeds = envRssFeeds.split(",").map((url) => url.trim());
 
-  // Retrieve and format articles
-  const epubContent = await mediaSource.computeArticlesFromNewsList(newsList);
+  // Now create a media source for each RSS feed, fetch & format them and add them to the ebook list
+  let epubContent: EpubContentOptions[] = [];
+  let epubCover: string | undefined;
+  for (const rssFeed of rssFeeds) {
+    // Create the MediaSource which can handle this feed
+    const mediaSource = createMediaSource(rssFeed, prg_options.debug);
+    if (mediaSource) {
+      // Retrieve news from service
+      let newsList = await mediaSource.retrieveNewsListFromSource();
 
+      // If we're in interactive mode, allow the user to filter the articles he wants to keep
+      if (prg_options.interactive) {
+        console.info(chalk.bold.magenta(mediaSource.feedTitle));
+        const questions = [
+          {
+            type: "multiselect",
+            name: "selection",
+            message: "Select the articles you want to read",
+            choices: newsList.map((news) => {
+              return { title: news.title, value: news, selected: true };
+            }),
+            hint: "- Space & Left/Right to toggle. Return to submit",
+          },
+        ];
+        const response = await prompts(questions as any);
+        newsList = response.selection;
+      }
+
+      // Retrieve and format articles
+      epubContent = epubContent.concat(await mediaSource.computeArticlesFromNewsList(newsList));
+      if (!epubCover) epubCover = mediaSource.mediaSourceCover;
+    }
+  }
   // Finally, create the ebook !
-  generateNewsEpub(prg_options.title, epubContent, mediaSource.mediaSourceCover);
+  generateNewsEpub(prg_options.title, epubContent, epubCover);
 }
 
+// Enter script
 main();
