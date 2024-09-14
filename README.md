@@ -3,7 +3,7 @@ Fetch RSS feeds from online media and create an ebook. Better way to read news f
 
 Written with Node.js and Typescript, it will create a cli tool called `epub_news` you can run to generate your ebook news.
 
-So far, it will retrieve latest news from [Le Monde](https://www.lemonde.fr/).
+So far, it can retrieve latest news from [Le Monde](https://www.lemonde.fr/) and [Gamekult](https://www.gamekult.com/).
 
 > ⚠️ _Le Monde has both public and membership articles. I encourage you to help them if you can! On top of that, some articles behind a paywall will require you to set your website cookie in order to be fetched._
 
