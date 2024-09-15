@@ -12,6 +12,10 @@ const CLEAN_DOM_LIST = [
   ".services.services--footer",
   ".article__reactions",
   ".article__siblings",
+  ".article__status",
+  ".meta__article-en-fr-url-link",
+  ".catcher__favorite",
+  "picture",
 ];
 // Regex to match all kinds of feeds from Le Monde
 const RSS_MATCHING_REGEX = new RegExp("(^https://www.lemonde.fr/){1}[a-z/_]*(rss)+[a-z/_]*(.xml$){1}");
@@ -82,6 +86,15 @@ export default class LeMondeMediaSource extends MediaSource<CustomRssFeed, Custo
       }
     }
 
+    // Manage images.
+    const images = root.querySelectorAll("img");
+    images.forEach((img) => {
+      const dataSrc = img.getAttribute("src");
+      if (dataSrc && dataSrc.includes("data:image/svg+xml")) {
+        img.remove();
+      }
+    });
+
     // Create a book cover from this article
     this.createBookCoverFromArticle(newsFeed, article);
 
@@ -110,5 +123,40 @@ export default class LeMondeMediaSource extends MediaSource<CustomRssFeed, Custo
         this._cover = this._cover.replace(DEFAUT_FEED_IMAGE_SIZE, EXPECTED_COVER_IMAGE_SIZE);
       }
     }
+  }
+
+  /**
+   * Custom css to inject in the final epub
+   */
+  public get customCss(): string | undefined {
+    return `
+.zone--article img, .article--content img {
+  min-width: 80%;
+  padding: 8px 10%;
+}
+.zone--article figcaption, .article--content figcaption {
+  opacity: 0.75;
+  font-style: italic;
+  font-size: 80%;
+  padding: 0 10%;
+  text-align: center;
+  padding: 0;
+}
+
+.breadcrumb {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+.breadcrumb li {
+  display: inline
+  margin: 0;
+  padding: 0;
+}
+.breadcrumb li:before {
+  content: "/";
+  padding: 0 8px;
+}
+`;
   }
 }
