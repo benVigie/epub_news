@@ -4,9 +4,12 @@ import { parse } from "node-html-parser";
 import { MediaSource, TrimArticleError } from "./media_source.js";
 
 const GAMEKULT_FEED_URL = "https://www.gamekult.com/feed.xml";
+// Regex to match Gamekult image sizes
+const IMAGE_SIZE_REGEX = new RegExp("(__[hw][0-9]+.)");
 
 // List of useless html nodes we can rid of
 const CLEAN_DOM_LIST = [
+  "script",
   ".gk__button__comment",
   ".ed__review__article__footer__infos",
   ".ed__editorial__footer",
@@ -69,6 +72,10 @@ export default class GamekultMediaSource extends MediaSource<CustomRssFeed, Cust
       const dataSrc = img.getAttribute("data-src");
       if (dataSrc) {
         img.setAttribute("src", dataSrc);
+      }
+      const src = img.getAttribute("src");
+      if (src && IMAGE_SIZE_REGEX.test(src)) {
+        img.setAttribute("src", src.replace(IMAGE_SIZE_REGEX, "__w1440."));
       }
     });
 

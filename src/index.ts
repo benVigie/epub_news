@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import path from "node:path";
+import fs from "node:fs";
 import "dotenv/config";
 import chalk from "chalk";
 import { EPub, EpubContentOptions, EpubOptions } from "@lesjoursfr/html-to-epub";
@@ -26,7 +27,9 @@ program
 program.parse();
 prg_options = program.opts();
 
-function generateNewsEpub(title: string, content: EpubContentOptions[], cover?: string) {
+function generateNewsEpub(title: string, content: EpubContentOptions[], customCss: string, cover?: string) {
+  const css = fs.readFileSync(path.resolve(import.meta.dirname, "../epub.css"));
+
   const epubOptions: EpubOptions = {
     title,
     description: `Les titres du ${dt.toLocaleString(DateTime.DATE_FULL)}`,
@@ -36,6 +39,7 @@ function generateNewsEpub(title: string, content: EpubContentOptions[], cover?: 
     tocTitle: "Liste des articles",
     appendChapterTitles: false,
     content,
+    css: css + customCss,
   };
   const filePath = path.join(prg_options.path, `${title}.epub`);
   const epub = new EPub(epubOptions, filePath);
@@ -65,6 +69,7 @@ async function main() {
 
   // Now create a media source for each RSS feed, fetch & format them and add them to the ebook list
   let epubContent: EpubContentOptions[] = [];
+  let customCss: string = "";
   let epubCover: string | undefined;
   for (const rssFeed of rssFeeds) {
     // Create the MediaSource which can handle this feed
@@ -93,11 +98,14 @@ async function main() {
 
       // Retrieve and format articles
       epubContent = epubContent.concat(await mediaSource.computeArticlesFromNewsList(newsList));
+      // Set cover if we don't have one yet
       if (!epubCover) epubCover = mediaSource.mediaSourceCover;
+      // Set css if there is one for this media
+      if (mediaSource.customCss && !customCss.includes(mediaSource.customCss)) customCss += mediaSource.customCss;
     }
   }
   // Finally, create the ebook !
-  generateNewsEpub(prg_options.title, epubContent, epubCover);
+  generateNewsEpub(prg_options.title, epubContent, customCss, epubCover);
 }
 
 // Enter script

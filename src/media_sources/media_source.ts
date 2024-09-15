@@ -47,6 +47,13 @@ export abstract class MediaSource<T = { [key: string]: any }, U = { [key: string
   }
 
   /**
+   * Custom css to inject in the final epub. Used in implementation classes according to your media
+   */
+  public get customCss(): string | undefined {
+    return undefined;
+  }
+
+  /**
    * Retrieve the news list from RSS source
    * @returns the news list
    */
