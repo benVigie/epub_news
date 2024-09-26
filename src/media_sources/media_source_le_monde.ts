@@ -18,7 +18,7 @@ const CLEAN_DOM_LIST = [
   "picture",
 ];
 // Regex to match all kinds of feeds from Le Monde
-const RSS_MATCHING_REGEX = new RegExp("(^https://www.lemonde.fr/){1}[a-z/_]*(rss)+[a-z/_]*(.xml$){1}");
+const RSS_MATCHING_REGEX = new RegExp("(^https://www.lemonde.fr/){1}[a-z/_-]*(rss)+[a-z/_]*(.xml$){1}");
 // Constants of image size embeded in news image url
 const DEFAUT_FEED_IMAGE_SIZE = "644/322";
 const EXPECTED_COVER_IMAGE_SIZE = "1410/2250";
