@@ -23,6 +23,7 @@
       "outFiles": [
         "${workspaceFolder}/dist/**/*.js"
       ],
+      "console": "integratedTerminal",
       "args": ["-i"]
     }
   ]
