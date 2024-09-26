@@ -92,7 +92,7 @@ async function main() {
             name: "selection",
             message: "Select the articles you want to read",
             choices: newsList.map((news) => {
-              return { title: news.title, value: news, selected: true };
+              return { title: news.title, value: news, selected: false };
             }),
             hint: "- Space & Left/Right to toggle. Return to submit",
           },
