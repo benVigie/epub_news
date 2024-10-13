@@ -2,7 +2,8 @@
 
 import path from "node:path";
 import fs from "node:fs";
-import "dotenv/config";
+// import "dotenv/config";
+import dotenv from "dotenv";
 import chalk from "chalk";
 import { EPub, EpubContentOptions, EpubOptions } from "@lesjoursfr/html-to-epub";
 import { Command, OptionValues } from "commander";
@@ -21,11 +22,15 @@ program
   .description("Fetch RSS feeds from online media and create an ebook. Better way to read news from e-ink tablets !")
   .version("1.0.0")
   .option("-i, --interactive", "select which article to keep in the news feeds", false)
-  .option("-p, --path <path>", "default path to export epub", process.env.DEFAULT_EXPORT_PATH || ".")
+  .option("-p, --path <path>", "default path to export epub", ".")
   .option("-t, --title <title>", "ebook title", dt.toLocaleString(DateTime.DATE_FULL))
+  .option("-e, --envPath", "Path to the env file to load (if any)", ".env")
   .option("-d, --debug", "Debug options", false);
 program.parse();
 prg_options = program.opts();
+
+// Load environment variables from file if specified
+dotenv.config({ path: prg_options.envPath });
 
 function generateNewsEpub(title: string, content: EpubContentOptions[], customCss: string, cover?: string) {
   const css = fs.readFileSync(path.resolve(import.meta.dirname, "../epub.css"));

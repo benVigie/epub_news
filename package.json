@@ -5,10 +5,11 @@
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
-    "build": "tsc && mv ./dist/index.js ./dist/epub_news && chmod +x ./dist/epub_news",
-    "start": "tsc && node ./dist/index.js",
-    "debug": "tsc && node ./dist/index.js",
-    "debug-i": "tsc && node ./dist/index.js -i",
+    "build": "tsc",
+    "start": "node ./dist/index.js",
+    "debug": "npm run build && npm run start",
+    "debug-i": "npm run build && npm run start -- -i",
+    "tool": "npm run build && mv ./dist/index.js ./dist/epub_news && chmod +x ./dist/epub_news",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "benVigie",
