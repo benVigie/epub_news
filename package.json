@@ -5,11 +5,10 @@
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && chmod +x ./dist/index.js",
     "start": "node ./dist/index.js",
     "debug": "npm run build && npm run start",
     "debug-i": "npm run build && npm run start -- -i",
-    "tool": "npm run build && mv ./dist/index.js ./dist/epub_news && chmod +x ./dist/epub_news",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "benVigie",

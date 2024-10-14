@@ -1,15 +1,12 @@
 #!/usr/bin/env node
 
 import path from "node:path";
-import fs from "node:fs";
-// import "dotenv/config";
 import dotenv from "dotenv";
 import chalk from "chalk";
-import { EPub, EpubContentOptions, EpubOptions } from "@lesjoursfr/html-to-epub";
+import prompts from "prompts";
 import { Command, OptionValues } from "commander";
 import { DateTime } from "luxon";
-import createMediaSource from "./media_sources/media_source_factory.js";
-import prompts from "prompts";
+import EpubNews, { EpubArticle } from "./epub_news.js";
 
 // Globals and tools
 const program = new Command();
@@ -22,9 +19,9 @@ program
   .description("Fetch RSS feeds from online media and create an ebook. Better way to read news from e-ink tablets !")
   .version("1.0.0")
   .option("-i, --interactive", "select which article to keep in the news feeds", false)
-  .option("-p, --path <path>", "default path to export epub", ".")
+  .option("-p, --path <path>", "default path to export epub", "./ if no DEFAULT_EXPORT_PATH set in env")
   .option("-t, --title <title>", "ebook title", dt.toLocaleString(DateTime.DATE_FULL))
-  .option("-e, --envPath", "Path to the env file to load (if any)", ".env")
+  .option("-e, --envPath <path>", "Path to the env file to load (if any)", ".env")
   .option("-d, --debug", "Debug options", false);
 program.parse();
 prg_options = program.opts();
@@ -32,33 +29,12 @@ prg_options = program.opts();
 // Load environment variables from file if specified
 dotenv.config({ path: prg_options.envPath });
 
-function generateNewsEpub(title: string, content: EpubContentOptions[], customCss: string, cover?: string) {
-  const css = fs.readFileSync(path.resolve(import.meta.dirname, "../epub.css"));
-
-  const epubOptions: EpubOptions = {
-    title,
-    description: `Les titres du ${dt.toLocaleString(DateTime.DATE_FULL)}`,
-    author: "Le Monde",
-    cover: cover,
-    lang: "fr",
-    tocTitle: "Liste des articles",
-    appendChapterTitles: false,
-    content,
-    css: css + customCss,
-  };
-  const filePath = path.join(prg_options.path, `${title}.epub`);
-  const epub = new EPub(epubOptions, filePath);
-  epub
-    .render()
-    .then(() => {
-      console.log(chalk.green("\nEbook Generated Successfully!"), chalk.cyan(filePath + "\n"));
-    })
-    .catch((err) => {
-      console.error(chalk.bold.red("Failed to generate Ebook because of ", err));
-    });
-}
-
 async function main() {
+  const epub = new EpubNews(prg_options.debug);
+  let epubContent: EpubArticle[] = [];
+  let customCss: string = "";
+  let epubCover: string | undefined;
+
   // First, retrieve feeds from env
   const envRssFeeds = process.env.RSS_FEEDS;
   if (!envRssFeeds) {
@@ -72,50 +48,53 @@ async function main() {
   }
   const rssFeeds = envRssFeeds.split(",").map((url) => url.trim());
 
-  // Now create a media source for each RSS feed, fetch & format them and add them to the ebook list
-  let epubContent: EpubContentOptions[] = [];
-  let customCss: string = "";
-  let parsed: string[] = [];
-  let epubCover: string | undefined;
-  for (const rssFeed of rssFeeds) {
-    // Create the MediaSource which can handle this feed
-    const mediaSource = createMediaSource(rssFeed, prg_options.debug);
-    if (mediaSource) {
-      // Retrieve news from service and remove already parsed ones
-      let newsList = await mediaSource.retrieveNewsListFromSource();
-      newsList = newsList.filter((news) => (news.guid ? !parsed.includes(news.guid) : true));
-
-      // Add news guid to the parsed articles to not treat several times the same ones
-      parsed = parsed.concat(newsList.map((news) => (news.guid ? news.guid : "")));
+  try {
+    let parsed: string[] = [];
+    for (const rssFeed of rssFeeds) {
+      // First, retrieve articles from the RSS feed
+      const feedList = await epub.listArticlesFromFeed(rssFeed);
+      // Removed already seen ones if any and added the remaining to the seen list to avoid having several times the sames ones from same media feeds
+      feedList.articles = feedList.articles.filter((news) => (news.guid ? !parsed.includes(news.guid) : true));
+      parsed = parsed.concat(feedList.articles.map((news) => (news.guid ? news.guid : "")));
 
       // If we're in interactive mode, allow the user to filter the articles he wants to keep
       if (prg_options.interactive) {
-        console.info(chalk.bold.magenta(mediaSource.feedTitle));
+        console.info(chalk.bold.magenta(feedList.feedTitle));
         const questions = [
           {
             type: "multiselect",
             name: "selection",
             message: "Select the articles you want to read",
-            choices: newsList.map((news) => {
+            choices: feedList.articles.map((news) => {
               return { title: news.title, value: news, selected: false };
             }),
             hint: "- Space & Left/Right to toggle. Return to submit",
           },
         ];
         const response = await prompts(questions as any);
-        newsList = response.selection;
+        feedList.articles = response.selection;
       }
 
       // Retrieve and format articles
-      epubContent = epubContent.concat(await mediaSource.computeArticlesFromNewsList(newsList));
-      // Set cover if we don't have one yet
-      if (!epubCover) epubCover = mediaSource.mediaSourceCover;
-      // Set css if there is one for this media
-      if (mediaSource.customCss && !customCss.includes(mediaSource.customCss)) customCss += mediaSource.customCss;
+      const epubData = await epub.getEpubDataFromArticles(rssFeed, feedList.articles);
+      // Add articles to our epub list
+      epubContent = epubContent.concat(epubData.articles);
+      // Set cover and custom css if we need to
+      if (!epubCover) epubCover = epubData.cover;
+      if (epubData.customCss && !customCss.includes(epubData.customCss)) customCss += epubData.customCss;
     }
+
+    // Finally, create the ebook !
+    const filePath = path.join(process.env.DEFAULT_EXPORT_PATH || prg_options.path, `${prg_options.title}.epub`);
+    const generation = await epub.generateEpubNews(filePath, prg_options.title, epubContent, customCss, epubCover);
+    console.log(
+      chalk.green("\nEbook Generated Successfully!"),
+      chalk.cyan(filePath),
+      chalk.gray(`(${generation.result})` + "\n"),
+    );
+  } catch (err) {
+    console.error(chalk.bold.red("Failed to generate Ebook because of ", err));
   }
-  // Finally, create the ebook !
-  generateNewsEpub(prg_options.title, epubContent, customCss, epubCover);
 }
 
 // Enter script

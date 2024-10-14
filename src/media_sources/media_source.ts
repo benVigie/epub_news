@@ -93,6 +93,7 @@ export abstract class MediaSource<T = { [key: string]: any }, U = { [key: string
           articles.push({
             title: news.title,
             data: trimedArticle,
+            author: news.creator,
           });
           this._spinner.suffixText = chalk.green("ok");
           this._spinner.succeed();
