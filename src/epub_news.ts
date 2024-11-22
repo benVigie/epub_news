@@ -6,7 +6,8 @@ import { EPub, EpubContentOptions, EpubOptions } from "@lesjoursfr/html-to-epub"
 import createMediaSource from "./media_sources/media_source_factory.js";
 
 const UNKNOWN_RSS_FEED_TITLE = "No feed title";
-const dt: DateTime = DateTime.now().setLocale("fr");
+const LOCALE = "fr";
+const dt: DateTime = DateTime.now().setLocale(LOCALE);
 
 export type EpubArticle = EpubContentOptions;
 
@@ -83,8 +84,8 @@ export default class EpubNews {
 
     // Fetch and format epub data from the given article list
     return {
-      feedTitle: mediaSource.feedTitle || UNKNOWN_RSS_FEED_TITLE,
       articles: await mediaSource.computeArticlesFromNewsList(articles),
+      feedTitle: mediaSource.feedTitle || UNKNOWN_RSS_FEED_TITLE,
       cover: mediaSource.mediaSourceCover,
       customCss: mediaSource.customCss,
     };
@@ -116,7 +117,7 @@ export default class EpubNews {
       description: description || `Les titres du ${dt.toLocaleString(DateTime.DATE_FULL)}`,
       author: "Le Monde",
       cover: cover,
-      lang: "fr",
+      lang: LOCALE,
       tocTitle: "Liste des articles",
       appendChapterTitles: false,
       content,
