@@ -1,14 +1,30 @@
 {
   "name": "epub_news",
   "version": "1.0.0",
-  "description": "Fetch RSS feeds from online media and create an ebook. Better way to read news from e-ink tablets !",
+  "description": "Retrieve RSS feeds from online media and create an eBook. A better way to read news on e-ink tablets!",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/benVigie/epub_news"
+  },
+  "homepage": "https://github.com/benVigie/epub_news#readme",
+  "bugs": {
+    "url": "https://github.com/benVigie/epub_news/issues"
+  },
+  "keywords": [
+    "epub",
+    "ebook",
+    "news",
+    "cli",
+    "generator"
+  ],
   "main": "dist/index.js",
+  "bin": "dist/news_cli.js",
   "type": "module",
   "scripts": {
-    "build": "tsc && mv ./dist/index.js ./dist/epub_news && chmod +x ./dist/epub_news",
-    "start": "tsc && node ./dist/index.js",
-    "debug": "tsc && node ./dist/index.js",
-    "debug-i": "tsc && node ./dist/index.js -i",
+    "build": "tsc && chmod +x ./dist/news_cli.js",
+    "start": "node ./dist/news_cli.js",
+    "debug": "npm run build && npm run start",
+    "debug-i": "npm run build && npm run start -- -i",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "benVigie",

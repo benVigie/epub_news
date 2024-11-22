@@ -6,9 +6,10 @@ import GamekultMediaSource from "./media_source_gamekult.js";
 /**
  * MediaSource factory. It will create a MediaSource instance according to the given rss feed url.
  * If no match is found, null will be returned.
- * @param rssFeedUrl
+ * @param rssFeedUrl The rss feed we want to retrieve
+ * @param debug True if we want to print debug traces. Default false
  */
-export default function createMediaSource(rssFeedUrl: string, debug: boolean): MediaSource | null {
+export default function createMediaSource(rssFeedUrl: string, debug: boolean = false): MediaSource | null {
   // Try to match with Le Monde implementation
   if (LeMondeMediaSource.isHandlingRssFeed(rssFeedUrl)) return new LeMondeMediaSource(rssFeedUrl, debug);
 
