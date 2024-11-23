@@ -3,7 +3,7 @@
 name: Update package version
 on:
   release:
-    types: [prereleased]
+    types: [created]
 
 jobs:
   updated-version:
