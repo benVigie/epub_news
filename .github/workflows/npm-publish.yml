@@ -30,7 +30,6 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - run: npm ci
       - run: npm run build
-      # - run: npm publish
-      - run: echo "Name: ${{ github.event.release.name }} Description: ${{ github.event.release.body }} Tag: ${{github.event.release.tag_name}}"
+      - run: echo "Name [${{ github.event.release.name }}] Description [${{ github.event.release.body }}] Tag [${{ github.event.release.tag_name }}]"
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
