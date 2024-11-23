@@ -5,7 +5,7 @@ name: Publish package on npm registry
 
 on:
   release:
-    types: [released]
+    types: [created]
 
 jobs:
   build:
@@ -18,6 +18,16 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm test
+
+  update-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: pocket-apps/action-update-version@v1
+        with:
+          files: 'package.json'
+          version-regexp: '\d+.\d+.\d+'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
   publish-npm:
     needs: build
