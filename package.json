@@ -1,6 +1,6 @@
 {
   "name": "epub_news",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Retrieve RSS feeds from online media and create an eBook. A better way to read news on e-ink tablets!",
   "repository": {
     "type": "git",
