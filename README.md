@@ -1,3 +1,5 @@
+[![NPM](https://img.shields.io/badge/NPM-%23CB3837.svg?style=for-the-badge&logo=npm&logoColor=white)](https://www.npmjs.com/package/epub_news)
+
 # Epub News
 Retrieve RSS feeds from online media and create an eBook. A better way to read news on e-ink tablets !
 
