@@ -15,6 +15,7 @@ export type EpubArticle = EpubContentOptions;
  * Describe article list
  */
 export interface ArticlesList {
+  feed: string;
   feedTitle: string;
   articles: Parser.Item[];
 }
@@ -62,6 +63,7 @@ export default class EpubNews {
     return {
       articles: await mediaSource.retrieveNewsListFromSource(),
       feedTitle: mediaSource.feedTitle || UNKNOWN_RSS_FEED_TITLE,
+      feed: rssFeedUrl,
     };
   }
 
