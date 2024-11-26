@@ -22,7 +22,8 @@ program
   .option("-p, --path <path>", "default path for epub export", "./ if no DEFAULT_EXPORT_PATH set in env")
   .option("-t, --title <title>", "Ebook title", dt.toLocaleString(DateTime.DATE_FULL))
   .option("-e, --envPath <path>", "Path to the env file to load (if any)", ".env")
-  .option("-d, --debug", "Debug options", false);
+  .option("-d, --debug", "Debug options", false)
+  .option("-v, --verbose", "Print all app operations in terminal", true);
 program.parse();
 prg_options = program.opts();
 
@@ -30,7 +31,7 @@ prg_options = program.opts();
 dotenv.config({ path: prg_options.envPath });
 
 async function main() {
-  const epub = new EpubNews(prg_options.debug);
+  const epub = new EpubNews({ debug: prg_options.debug, details: prg_options.verbose });
   let epubContent: EpubArticle[] = [];
   let customCss: string = "";
   let epubCover: string | undefined;

@@ -31,6 +31,7 @@ Options:
   -t, --title <title>  Ebook title (default: "today's date")
   -e, --envPath <path> Path to the env file to load (default: "./.env")
   -d, --debug          Debug options (default: false)
+  -v, --verbose        Print all app operations in terminal (default: true)
   -h, --help           Show tool help
 ```
 
