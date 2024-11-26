@@ -4,6 +4,7 @@ import Parser from "rss-parser";
 import ora, { Ora } from "ora";
 import terminalLink from "terminal-link";
 import { EpubContentOptions } from "@lesjoursfr/html-to-epub";
+import { Options } from "../epub_news.js";
 
 /** Default trim article error */
 export class TrimArticleError extends Error {}
@@ -15,15 +16,15 @@ export class TrimArticleError extends Error {}
 export abstract class MediaSource<T = { [key: string]: any }, U = { [key: string]: any }> {
   protected _rss_sources: string;
   protected _rss_parser: Parser<T, U>;
-  protected _debug: boolean;
+  protected _options: Options;
   protected _feedTitle: string | undefined;
   protected _spinner: Ora;
   protected _fetchOptions: https.RequestOptions;
   protected _cover: string | undefined;
 
-  constructor(source: string, debug: boolean = false) {
+  constructor(source: string, options: Options) {
     this._rss_sources = source;
-    this._debug = debug;
+    this._options = options;
     this._spinner = ora();
     this._fetchOptions = {};
     // You may need to create a new parser which will match your source's feed and items custom fields
@@ -66,7 +67,7 @@ export abstract class MediaSource<T = { [key: string]: any }, U = { [key: string
    * @param rssFeedUrl
    */
   public static isHandlingRssFeed(rssFeedUrl: string): boolean {
-    throw new Error("Your MediaSOurce implementation must implement this function");
+    throw new Error("Your MediaSource implementation must implement this function");
   }
 
   /**
@@ -95,18 +96,20 @@ export abstract class MediaSource<T = { [key: string]: any }, U = { [key: string
             data: trimedArticle,
             author: news.creator,
           });
-          this._spinner.suffixText = chalk.green("ok");
-          this._spinner.succeed();
+          if (this._options.details) {
+            this._spinner.suffixText = chalk.green("ok");
+            this._spinner.succeed();
+          }
         } catch (error) {
           if (error instanceof TrimArticleError) {
-            this._spinner.suffixText = chalk.yellow(error.toString());
+            if (this._options.details) this._spinner.suffixText = chalk.yellow(error.toString());
           }
           // If an error occurs, display the article link in console for information
           const link = terminalLink(news.title, news.link);
-          this._spinner.warn(chalk.italic.gray(link));
+          if (this._options.details) this._spinner.warn(chalk.italic.gray(link));
         }
       } else {
-        this._spinner.warn(chalk.italic.red("No title or link for this news, skip"));
+        if (this._options.details) this._spinner.warn(chalk.italic.red("No title or link for this news, skip"));
       }
     }
     return articles;
@@ -119,11 +122,11 @@ export abstract class MediaSource<T = { [key: string]: any }, U = { [key: string
    */
   protected async parseRSSFeed(): Promise<Array<U & Parser.Item>> {
     const feed = await this._rss_parser.parseURL(this._rss_sources);
-    if (this._debug) console.info(chalk.blue.magenta(feed.title));
+    if (this._options.debug) console.info(chalk.blue.magenta(feed.title));
 
     this._feedTitle = feed.title;
     feed.items.forEach((item) => {
-      if (this._debug) {
+      if (this._options.debug) {
         console.log(chalk.blue(`  - ${item.title}`), chalk.gray(`(${item.pubDate})`));
       }
     });
@@ -190,8 +193,10 @@ export abstract class MediaSource<T = { [key: string]: any }, U = { [key: string
    * @param text Spinner text
    */
   protected startInfoSpinner(text: string): void {
-    this._spinner = ora(chalk.italic(text));
-    this._spinner.indent = 2;
-    this._spinner.start();
+    if (this._options.details) {
+      this._spinner = ora(chalk.italic(text));
+      this._spinner.indent = 2;
+      this._spinner.start();
+    }
   }
 }

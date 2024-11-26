@@ -2,6 +2,7 @@ import chalk from "chalk";
 import Parser from "rss-parser";
 import { parse } from "node-html-parser";
 import { MediaSource, TrimArticleError } from "./media_source.js";
+import { Options } from "../epub_news.js";
 
 const GAMEKULT_FEED_URL = "https://www.gamekult.com/feed.xml";
 // Regex to match Gamekult image sizes
@@ -33,8 +34,9 @@ type CustomRssItem = { "media:content": any }; // Adding media:content to retrie
  * https://www.gamekult.com/
  */
 export default class GamekultMediaSource extends MediaSource<CustomRssFeed, CustomRssItem> {
-  constructor(source: string, debug: boolean = false) {
-    super(source, debug);
+  constructor(source: string, options: Options) {
+    super(source, options);
+
     // Create a new rss parser with custom Gamekult fields
     this._rss_parser = new Parser({
       customFields: { feed: [], item: ["media:content"] },
@@ -55,7 +57,7 @@ export default class GamekultMediaSource extends MediaSource<CustomRssFeed, Cust
    */
   protected trimArticleForEpub(newsFeed: Parser.Item & CustomRssItem, article: string): string {
     // Update user feedback
-    this._spinner.suffixText = chalk.italic.green("trimming...");
+    if (this._options.details) this._spinner.suffixText = chalk.italic.green("trimming...");
 
     // Remove useless nodes
     const root = parse(article);
