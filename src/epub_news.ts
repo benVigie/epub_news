@@ -11,6 +11,12 @@ const dt: DateTime = DateTime.now().setLocale(LOCALE);
 
 export type EpubArticle = EpubContentOptions;
 
+/** MediaSource options */
+export interface Options {
+  debug?: boolean;
+  details?: boolean;
+}
+
 /**
  * Describe article list
  */
@@ -37,10 +43,13 @@ export class NoMediaSourceError extends Error {}
  * EpubNews is the lib which controls the fetching of articles and generate the epub news
  */
 export default class EpubNews {
-  private _debug: boolean;
+  private _options: Options;
 
-  constructor(debug: boolean = false) {
-    this._debug = debug;
+  constructor(options: Options) {
+    // Default values
+    if (options.debug === undefined) options.debug = false;
+    if (options.details === undefined) options.details = false;
+    this._options = options;
   }
 
   /**
@@ -52,7 +61,7 @@ export default class EpubNews {
    */
   async listArticlesFromFeed(rssFeedUrl: string): Promise<ArticlesList> {
     // Try to retrieve a media source from the feed
-    const mediaSource = createMediaSource(rssFeedUrl, this._debug);
+    const mediaSource = createMediaSource(rssFeedUrl, this._options);
     if (!mediaSource) {
       throw new NoMediaSourceError(
         `No media source implemented for ${rssFeedUrl}> Are you sure it matches one of your MediaSource implementation ?`,
@@ -77,7 +86,7 @@ export default class EpubNews {
    */
   async getEpubDataFromArticles(rssFeedUrl: string, articles: Array<Parser.Item>): Promise<EpubArticlesData> {
     // Try to retrieve a media source from the feed
-    const mediaSource = createMediaSource(rssFeedUrl, this._debug);
+    const mediaSource = createMediaSource(rssFeedUrl, this._options);
     if (!mediaSource) {
       throw new NoMediaSourceError(
         `No media source implemented for ${rssFeedUrl}> Are you sure it matches one of your MediaSource implementation ?`,

@@ -2,6 +2,7 @@ import chalk from "chalk";
 import Parser from "rss-parser";
 import { parse } from "node-html-parser";
 import { MediaSource, TrimArticleError } from "./media_source.js";
+import { Options } from "../epub_news.js";
 
 // List of useless html nodes we can rid of
 const CLEAN_DOM_LIST = [
@@ -32,8 +33,9 @@ type CustomRssItem = { "media:content": any }; // Adding media:content to retrie
  * https://www.lemonde.fr
  */
 export default class LeMondeMediaSource extends MediaSource<CustomRssFeed, CustomRssItem> {
-  constructor(source: string, debug: boolean = false) {
-    super(source, debug);
+  constructor(source: string, options: Options) {
+    super(source, options);
+
     // Create a new rss parser with custom "Le Monde" fields
     this._rss_parser = new Parser({
       customFields: { feed: [], item: ["media:content"] },
@@ -75,7 +77,7 @@ export default class LeMondeMediaSource extends MediaSource<CustomRssFeed, Custo
     }
 
     // Update user feedback
-    this._spinner.suffixText = chalk.italic.green("trimming...");
+    if (this._options.details) this._spinner.suffixText = chalk.italic.green("trimming...");
 
     // Remove useless nodes
     const root = parse(article);
