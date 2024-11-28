@@ -79,7 +79,7 @@ async function main() {
       // Retrieve and format articles
       const epubData = await epub.getEpubDataFromArticles(rssFeed, feedList.articles);
       // Add articles to our epub list
-      epubContent = epubContent.concat(epubData.articles);
+      epubContent = epubContent.concat(epubData.epubContent);
       // Set cover and custom css if we need to
       if (!epubCover) epubCover = epubData.cover;
       if (epubData.customCss && !customCss.includes(epubData.customCss)) customCss += epubData.customCss;

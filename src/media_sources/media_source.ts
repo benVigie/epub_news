@@ -3,11 +3,24 @@ import chalk from "chalk";
 import Parser from "rss-parser";
 import ora, { Ora } from "ora";
 import terminalLink from "terminal-link";
-import { EpubContentOptions } from "@lesjoursfr/html-to-epub";
-import { Options } from "../epub_news.js";
+import { EpubArticle, Options } from "../epub_news.js";
 
 /** Default trim article error */
 export class TrimArticleError extends Error {}
+
+/** Article fetching result */
+export interface ArticlesFetchingResult {
+  title: string;
+  link: string;
+  success: boolean;
+  error?: string;
+}
+
+/** Compute articles data result, epub content and fetching result */
+export interface ComputeArticlesResult {
+  epubContent: EpubArticle[];
+  results: ArticlesFetchingResult[];
+}
 
 /**
  * Media source is the abstract class every media source must inherit from.
@@ -75,8 +88,8 @@ export abstract class MediaSource<T = { [key: string]: any }, U = { [key: string
    * @param newsList The news list to parse
    * @returns A list of EpubContentOptions ready to be injected in the ebook
    */
-  public async computeArticlesFromNewsList(newsList: Array<Parser.Item & U>): Promise<Array<EpubContentOptions>> {
-    const articles: Array<EpubContentOptions> = [];
+  public async computeArticlesFromNewsList(newsList: Array<Parser.Item & U>): Promise<ComputeArticlesResult> {
+    const result: ComputeArticlesResult = { epubContent: [], results: [] };
 
     // Set fetch options before starting to retrieve articles
     this.setFetchOptions();
@@ -91,11 +104,13 @@ export abstract class MediaSource<T = { [key: string]: any }, U = { [key: string
         try {
           // Try to parse the article. If we have something, add it to the ebook
           const trimedArticle = this.trimArticleForEpub(news, article);
-          articles.push({
+          result.epubContent.push({
             title: news.title,
             data: trimedArticle,
             author: news.creator,
           });
+          result.results.push({ title: news.title, link: news.link, success: true });
+
           if (this._options.details) {
             this._spinner.suffixText = chalk.green("ok");
             this._spinner.succeed();
@@ -107,12 +122,18 @@ export abstract class MediaSource<T = { [key: string]: any }, U = { [key: string
           // If an error occurs, display the article link in console for information
           const link = terminalLink(news.title, news.link);
           if (this._options.details) this._spinner.warn(chalk.italic.gray(link));
+          result.results.push({
+            title: news.title,
+            link: news.link,
+            success: false,
+            error: (error as Error).toString(),
+          });
         }
       } else {
         if (this._options.details) this._spinner.warn(chalk.italic.red("No title or link for this news, skip"));
       }
     }
-    return articles;
+    return result;
   }
 
   /***
