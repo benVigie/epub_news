@@ -4,6 +4,7 @@ import Parser from "rss-parser";
 import { DateTime } from "luxon";
 import { EPub, EpubContentOptions, EpubOptions } from "@lesjoursfr/html-to-epub";
 import createMediaSource from "./media_sources/media_source_factory.js";
+import { ComputeArticlesResult } from "./media_sources/media_source.js";
 
 const UNKNOWN_RSS_FEED_TITLE = "No feed title";
 const LOCALE = "fr";
@@ -15,6 +16,20 @@ export type EpubArticle = EpubContentOptions;
 export interface Options {
   debug?: boolean;
   details?: boolean;
+}
+
+export interface ArticlesFetchingResult {
+  title: string;
+  link: string;
+  success: boolean;
+  error?: string;
+}
+
+export interface EbookResult {
+  result: string;
+  title: string;
+  path: string;
+  articles: ArticlesFetchingResult[];
 }
 
 /**
@@ -29,9 +44,8 @@ export interface ArticlesList {
 /**
  * Rss articles formated from feed, with cover image and css
  */
-export interface EpubArticlesData {
+export interface EpubArticlesData extends ComputeArticlesResult {
   feedTitle: string;
-  articles: EpubArticle[];
   cover: string | undefined;
   customCss: string | undefined;
 }
@@ -44,12 +58,13 @@ export class NoMediaSourceError extends Error {}
  */
 export default class EpubNews {
   private _options: Options;
+  private _fetching: ArticlesFetchingResult[];
 
-  constructor(options: Options) {
+  constructor(options?: Options) {
     // Default values
-    if (options.debug === undefined) options.debug = false;
-    if (options.details === undefined) options.details = false;
+    options = { debug: false, details: false, ...options };
     this._options = options;
+    this._fetching = [];
   }
 
   /**
@@ -95,7 +110,7 @@ export default class EpubNews {
 
     // Fetch and format epub data from the given article list
     return {
-      articles: await mediaSource.computeArticlesFromNewsList(articles),
+      ...(await mediaSource.computeArticlesFromNewsList(articles)),
       feedTitle: mediaSource.feedTitle || UNKNOWN_RSS_FEED_TITLE,
       cover: mediaSource.mediaSourceCover,
       customCss: mediaSource.customCss,
@@ -120,7 +135,7 @@ export default class EpubNews {
     customCss: string,
     cover?: string,
     description?: string,
-  ): Promise<{ result: string }> {
+  ): Promise<EbookResult> {
     const css = fs.readFileSync(path.resolve(import.meta.dirname, "../epub.css"));
 
     const epubOptions: EpubOptions = {
@@ -136,6 +151,12 @@ export default class EpubNews {
     };
 
     const epub = new EPub(epubOptions, filePath);
-    return epub.render();
+    const r = await epub.render();
+    return {
+      result: r.result,
+      title,
+      path: filePath,
+      articles: [],
+    };
   }
 }
