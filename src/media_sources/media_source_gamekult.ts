@@ -106,4 +106,25 @@ export default class GamekultMediaSource extends MediaSource<CustomRssFeed, Cust
       this._cover = newsFeed["media:content"]["$"]["url"];
     }
   }
+
+  /**
+   * Custom css to inject in the final epub
+   */
+  public get customCss(): string | undefined {
+    return `
+ img {
+  display: block;
+  min-width: 100%;
+  padding: 8px 0;
+}
+
+figcaption {
+  padding: 0;
+  opacity: 0.75;
+  font-style: italic;
+  font-size: 80%;
+  text-align: center;
+}
+`;
+  }
 }

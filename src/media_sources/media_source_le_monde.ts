@@ -137,12 +137,11 @@ export default class LeMondeMediaSource extends MediaSource<CustomRssFeed, Custo
   padding: 8px 10%;
 }
 .zone--article figcaption, .article--content figcaption {
+  padding: 0;
   opacity: 0.75;
   font-style: italic;
   font-size: 80%;
-  padding: 0 10%;
   text-align: center;
-  padding: 0;
 }
 
 .breadcrumb {

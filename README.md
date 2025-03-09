@@ -15,6 +15,7 @@ To install the `epub_news` cli, simply run `npm install -g epub_news`. It will i
 #### Configuration
 In order to run, `epub_news` needs a config file with important information such as the RSS feeds you want to retrieve for your eBook. You'll need to create an `.env` file with these info:
 ```apacheconf
+LOCALE=fr
 RSS_FEEDS=https://www.lemonde.fr/rss/une.xml,other,feed,comma,separated
 DEFAULT_EXPORT_PATH=/your/epub/export/path # Optional
 LE_MONDE_COOKIE="Use your account cookie to be able to retrieve all news from Le Monde" # Optional

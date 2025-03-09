@@ -7,7 +7,7 @@ import createMediaSource from "./media_sources/media_source_factory.js";
 import { ComputeArticlesResult } from "./media_sources/media_source.js";
 
 const UNKNOWN_RSS_FEED_TITLE = "No feed title";
-const LOCALE = "fr";
+const LOCALE = process.env.LOCALE || "fr";
 const dt: DateTime = DateTime.now().setLocale(LOCALE);
 
 export type EpubArticle = EpubContentOptions;
