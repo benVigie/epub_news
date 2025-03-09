@@ -10,7 +10,7 @@ import EpubNews, { EpubArticle } from "./epub_news.js";
 
 // Globals and tools
 const program = new Command();
-const dt: DateTime = DateTime.now().setLocale("fr");
+const dt: DateTime = DateTime.now().setLocale(process.env.LOCALE || "fr");
 let prg_options: OptionValues;
 
 // Manage script parameters and parse them from CLI to make them available through the options global
@@ -20,7 +20,7 @@ program
   .version("1.0.0")
   .option("-i, --interactive", "select which article to keep in the news feeds", false)
   .option("-p, --path <path>", "default path for epub export", "./ if no DEFAULT_EXPORT_PATH set in env")
-  .option("-t, --title <title>", "Ebook title", dt.toLocaleString(DateTime.DATE_FULL))
+  .option("-t, --title <title>", "Ebook title", `[${dt.toISODate()}] ${dt.toLocaleString(DateTime.DATE_FULL)}`)
   .option("-e, --envPath <path>", "Path to the env file to load (if any)", ".env")
   .option("-d, --debug", "Debug options", false)
   .option("-v, --verbose", "Print all app operations in terminal", true);
